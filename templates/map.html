@@ -1,0 +1,126 @@
+{% extends "layout.html" %}
+{% block content %}
+<div id='map'></div>
+<script>
+    mapboxgl.accessToken = ACCESSTOKEN_DO_MAPBOX;
+    var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/dark-v9',
+        center: [-47.87304, -15.700845],
+        zoom: 3
+    });
+
+    map.on('load', function () {
+        map.addSource('tweets', {
+            type: 'geojson',
+            data: 'https://raw.githubusercontent.com/granhokain/GeoJSONTweets/master/tweets.geojson'
+        });
+
+        map.addLayer({
+            "id": "tweets-heat",
+            "type": "heatmap",
+            "source": "tweets",
+            "maxzoom": 15,
+            "paint": {
+                // Increase the heatmap weight based on frequency and property crime_desc
+                "heatmap-weight": [
+                    "interpolate",
+                    ["linear"],
+                    ["get", "user_id"],
+                    0, 0,
+                    6, 1
+                ],
+                // Increase the heatmap color weight by zoom level
+                // heatmap-intensity is a multiplier on top of heatmap-weight
+                "heatmap-intensity": [
+                    "interpolate",
+                    ["linear"],
+                    ["zoom"],
+                    0, 1,
+                    9, 3
+                ],
+                // Color ramp for heatmap.  Domain is 0 (low) to 1 (high).
+                // Begin color ramp at 0-stop with a 0-transparancy color
+                // to create a blur-like effect.
+                "heatmap-color": [
+                    "interpolate",
+                    ["linear"],
+                    ["heatmap-density"],
+                    0, 'rgba(236,222,239,0)',
+                    0.2, 'rgb(208,209,230)',
+                    0.4, 'rgb(166,189,219)',
+                    0.6, 'rgb(103,169,207)',
+                    0.8, 'rgb(28,144,153)'
+                ],
+                // Adjust the heatmap radius by zoom level
+                "heatmap-radius": [
+                    "interpolate",
+                    ["linear"],
+                    ["zoom"],
+                    0, 2,
+                    9, 20
+                ],
+                // Transition from heatmap to circle layer by zoom level
+                "heatmap-opacity": [
+                    "interpolate",
+                    ["linear"],
+                    ["zoom"],
+                    7, 1,
+                    11, 0
+                ],
+            }
+        }, 'waterway-label');
+
+        map.addLayer({
+            "id": "tweets-point",
+            "type": "circle",
+            "source": "tweets",
+            "minzoom": 14,
+            "paint": {
+                // increase the radius of the circle as the zoom level and dbh value increases
+                "circle-radius": {
+                    "property": "dbh",
+                    "type": "exponential",
+                    "stops": [
+                        [{ zoom: 15, value: 1 }, 5],
+                        [{ zoom: 15, value: 62 }, 10],
+                        [{ zoom: 22, value: 1 }, 20],
+                        [{ zoom: 22, value: 62 }, 50],
+                    ]
+                },
+                "circle-color": {
+                    "property": "dbh",
+                    "type": "exponential",
+                    "stops": [
+                        [0, "rgba(236,222,239,0)"],
+                        [10, "rgb(236,222,239)"],
+                        [20, "rgb(208,209,230)"],
+                        [30, "rgb(166,189,219)"],
+                        [40, "rgb(103,169,207)"],
+                        [50, "rgb(28,144,153)"],
+                        [60, "rgb(1,108,89)"]
+                    ]
+                },
+                "circle-stroke-color": "white",
+                "circle-stroke-width": 1,
+                "circle-opacity": {
+                    "stops": [
+                        [14, 0],
+                        [15, 1]
+                    ]
+                }
+            }
+        }, 'waterway-label');
+    });
+
+    map.on('click', 'tweets-point', function (e) {
+        new mapboxgl.Popup()
+            .setLngLat(e.features[0].geometry.coordinates)
+            .setHTML('<b>Crime:</b> ' + e.features[0].properties.crime_desc)
+            .addTo(map);
+    });
+
+
+
+</script>
+{% endblock content %}

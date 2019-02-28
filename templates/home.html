@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+{% block content %}
+{% for post in tweets %}
+    <article class="media content-section">
+        <div class="media-body">
+            <div class="article-metadata">
+                <a class="mr-2" href="#">{{ post.tweet_id }}</a>
+                <small class="text-muted">{{ post.date|datetime }}</small>
+            </div>
+            <h2><a class="article-title" href="#"></a>{{ post.user }}</h2>
+            <p class="article-content">{{ post.text }}</p>
+        </div>
+    </article>
+{%endfor%}
+
+<div class="pagination mb-4">
+    {% for page_num in iter_pages %}
+        {% if current_page == page_num %}
+            {% if page_num - 1 > 0 %}
+                <a href="{{ url_for('home', page=1) }}">&laquo;</a>
+                <a href="{{ url_for('home', page=(page_num - 1)) }}">&lsaquo;</a>
+                <a href="{{ url_for('home', page=(page_num - 1)) }}">{{ page_num - 1 }}</a>
+            {% else %}
+                <a class="btn disabled" href="#">&laquo;</a>
+                <a class="btn disabled" href="#">&lsaquo;</a>
+            {% endif %}
+            <a class="btn active" href="{{ url_for('home', page=page_num) }}">{{ page_num }}</a>
+            {% if page_num + 1 <= total_pages %}
+                <a href="{{ url_for('home', page=(page_num + 1)) }}">{{ page_num + 1 }}</a>
+                <a href="{{ url_for('home', page=(page_num + 1)) }}">&rsaquo;</a>
+                <a href="{{ url_for('home', page=total_pages) }}">&raquo;</a>
+            {% else %}
+                <a class="btn disabled" href="#">&rsaquo;</a>
+                <a class="btn disabled" href="#">&raquo;</a>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+</div>
+{% endblock content %}

@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <div>
+                <h2>Bigram - Trigram</h2>
+                <div>Associação mais frequentes dos termos (bigram) e (trigram).</div>
+            </div>
+
+            <br />
+
+            <div class="col-xs-12" style="text-align: center;">
+                <div style="font-size: 22px;">
+
+                    {% for bt in values['bigram_trigram'] %}
+                    <span style="padding: 5px; background-color: #cccccc; color:#19334d; ">{{ bt.text }}</span>
+                    {% if loop.index % 4 == 0 %}
+                    <br /><br />
+                    {% endif %}
+
+                    {% endfor %}
+                </div>
+                <br /><br />
+            </div>
+        </div>
+    </div>
+    <br/>
+    <br/>
+    <div class="row">
+        <div class="col-md-12">
+            <div>
+                <h2>Word Cloud</h2>
+                <div>O termo pesquisado foi excluído da nuvem para melhor visualização dos demais termos.</div>
+                <br />
+            </div>
+            <div class="col-xs-12" style="text-align: left;">
+                <div id="loading"></div>
+                <section id="cloud"></section>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
